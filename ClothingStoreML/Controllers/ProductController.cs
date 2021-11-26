@@ -68,17 +68,19 @@ namespace ClothingStoreML
 
                 string root = _webHostEnvironment.WebRootPath;
 
-                string webPath = $"{root}/images/products/";
+                string path = $"/images/products/";
+
+                string webPath = $"{root}{path}";
 
                 string file = Guid.NewGuid().ToString().ToLower();
 
                 string fileName = $"{webPath}{file}{ext}";
 
-                productModel.ImageRef = fileName;
+                productModel.ImageRef = $"{path}{file}{ext}"; ;
 
                 Directory.CreateDirectory(webPath);
 
-                using (var fileStream = new FileStream(productModel.ImageRef, FileMode.Create))
+                using (var fileStream = new FileStream(fileName, FileMode.Create))
                 {
                     await upload.CopyToAsync(fileStream);
                 }
