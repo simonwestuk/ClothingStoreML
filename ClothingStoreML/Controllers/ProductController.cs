@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ClothingStoreML.Data;
 using ClothingStoreML.Models;
 using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace ClothingStoreML
 {
@@ -59,10 +60,29 @@ namespace ClothingStoreML
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Description,Size,Category,Price")] ProductModel productModel)
         {
-            var upload = Request.Form.Files[0];
-
             if (ModelState.IsValid)
             {
+                var upload = Request.Form.Files[0];
+
+                string ext = Path.GetExtension(upload.FileName);
+
+                string root = _webHostEnvironment.WebRootPath;
+
+                string webPath = $"{root}/images/products/";
+
+                string file = Guid.NewGuid().ToString().ToLower();
+
+                string fileName = $"{webPath}{file}{ext}";
+
+                productModel.ImageRef = fileName;
+
+                Directory.CreateDirectory(webPath);
+
+                using (var fileStream = new FileStream(productModel.ImageRef, FileMode.Create))
+                {
+                    await upload.CopyToAsync(fileStream);
+                }
+
                 _context.Add(productModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
